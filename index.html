@@ -1276,6 +1276,10 @@ function showTab(id, btn) {
   if(id==='simulate') initSimCanvas();
   if(id==='fbd') initFBDCanvas();
   if(id==='graph') drawGraph();
+  if(id==='newtons') {
+    const bank = document.getElementById('sort-bank');
+    if(bank && !bank.hasChildNodes()) initDragSort();
+  }
   if(id==='quiz') {
     const qc = document.getElementById('quiz-questions');
     if(!qc.hasChildNodes() || qc.style.display === 'none') initQuiz();
