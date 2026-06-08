@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhysicsFlow — Forces & Newton's Laws</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0f1f3d;
+  --navy2:   #162847;
+  --navy3:   #1e3a5f;
+  --teal:    #0d9488;
+  --teal2:   #14b8a6;
+  --teal3:   #5eead4;
+  --amber:   #f59e0b;
+  --amber2:  #fbbf24;
+  --amber3:  #fde68a;
+  --white:   #f0f7ff;
+  --slate:   #94a3b8;
+  --bg:      #0a1628;
+  --card:    #111e33;
+  --card2:   #162540;
+  --border:  #1e3a5f;
+  --text:    #e2eaf6;
+  --muted:   #7a93b8;
+  --red:     #f87171;
+  --green:   #34d399;
+  --blue:    #60a5fa;
+  --purple:  #a78bfa;
+  --radius:  12px;
+  --shadow:  0 4px 24px rgba(0,0,0,.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy3) 100%);
+  border-bottom: 2px solid var(--teal);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,.5);
+}
+
+.logo-mark {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--teal), var(--amber));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 18px; color: var(--navy);
+  flex-shrink: 0;
+}
+
+.header-text h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem; font-weight: 800;
+  color: var(--white);
+  letter-spacing: -.3px;
+}
+.header-text p {
+  font-size: .78rem; color: var(--teal2);
+  font-weight: 300; letter-spacing: .4px;
+}
+
+/* ── TAB NAV ── */
+.tab-nav {
+  background: var(--navy);
+  border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto;
+  padding: 0 12px;
+  gap: 2px;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  background: none; border: none;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem; font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all .2s;
+  white-space: nowrap;
+  letter-spacing: .2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab-btn:hover { color: var(--teal2); }
+.tab-btn.active {
+  color: var(--amber);
+  border-bottom-color: var(--amber);
+  font-weight: 600;
+}
+.tab-btn .tab-icon { font-size: 1rem; }
+
+/* ── CONTENT AREA ── */
+.tab-content { display: none; padding: 24px; max-width: 1000px; margin: 0 auto; }
+.tab-content.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.card-header {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  color: var(--teal2);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-header .icon { font-size: 1.1rem; }
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.section-sub {
+  color: var(--muted);
+  font-size: .88rem;
+  margin-bottom: 20px;
+}
+
+/* ── LEARN TAB ── */
+.force-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.force-tile {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: border-color .2s, transform .2s;
+}
+.force-tile:hover { border-color: var(--teal); transform: translateY(-2px); }
+.force-tile .ft-icon { font-size: 1.8rem; margin-bottom: 6px; }
+.force-tile .ft-name {
+  font-family: 'Syne', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  color: var(--amber2); margin-bottom: 4px;
+}
+.force-tile .ft-desc { font-size: .78rem; color: var(--muted); }
+
+.fbd-demo {
+  display: flex; justify-content: center; align-items: center;
+  padding: 30px;
+  background: var(--card2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 18px;
+  position: relative;
+}
+.fbd-demo canvas { display: block; }
+
+.balance-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.balance-card {
+  background: var(--card2);
+  border-radius: 10px;
+  padding: 16px;
+  border-left: 4px solid var(--teal);
+}
+.balance-card.unbalanced { border-left-color: var(--amber); }
+.balance-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  margin-bottom: 6px; color: var(--white);
+}
+.balance-card p { font-size: .82rem; color: var(--muted); }
+
+/* ── SIMULATE TAB ── */
+#sim-canvas {
+  width: 100%; height: 300px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: block;
+  margin-bottom: 18px;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.ctrl-item label {
+  display: block;
+  font-size: .8rem; font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.ctrl-item .ctrl-val {
+  font-family: 'DM Mono', monospace;
+  font-size: .88rem;
+  color: var(--amber);
+  float: right;
+}
+input[type=range] {
+  width: 100%; accent-color: var(--teal);
+  cursor: pointer;
+}
+
+.readout-bar {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.readout {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  flex: 1; min-width: 110px; text-align: center;
+}
+.readout .r-label { font-size: .72rem; color: var(--muted); margin-bottom: 2px; }
+.readout .r-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.05rem; font-weight: 500;
+  color: var(--teal3);
+}
+
+/* ── INVESTIGATE TAB ── */
+.inv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 600px) { .inv-grid { grid-template-columns: 1fr; } }
+
+.var-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.var-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  color: var(--amber2); margin-bottom: 12px;
+}
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+th {
+  background: var(--navy3);
+  color: var(--teal2);
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  padding: 8px 10px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(30,58,95,.5);
+  color: var(--text);
+}
+tr:hover td { background: rgba(13,148,136,.06); }
+
+.formula-box {
+  background: var(--navy3);
+  border: 1px solid var(--teal);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin: 16px 0;
+}
+.formula-box .formula {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem; color: var(--amber2);
+  font-weight: 500;
+}
+.formula-box .formula-desc { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+
+/* ── NEWTON LAWS TAB ── */
+.law-card {
+  background: var(--card2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  border-left: 5px solid var(--teal);
+  transition: box-shadow .2s;
+}
+.law-card:nth-child(2) { border-left-color: var(--amber); }
+.law-card:nth-child(3) { border-left-color: var(--blue); }
+.law-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+.law-card .law-num {
+  font-family: 'Syne', sans-serif;
+  font-size: .72rem; font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.law-card .law-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem; font-weight: 800;
+  color: var(--white); margin-bottom: 8px;
+}
+.law-card .law-statement {
+  font-size: .85rem; color: var(--muted);
+  margin-bottom: 14px;
+  font-style: italic;
+}
+.examples-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.example-chip {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: .78rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .18s;
+}
+.example-chip:hover, .example-chip.selected {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--navy);
+}
+
+/* ── FBD BUILDER TAB ── */
+.fbd-builder {
+  display: grid; grid-template-columns: 1fr 260px; gap: 16px;
+}
+@media (max-width: 650px) { .fbd-builder { grid-template-columns: 1fr; } }
+
+#fbd-canvas {
+  width: 100%; height: 380px;
+  background: var(--card2);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  display: block;
+  transition: border-color .2s;
+}
+#fbd-canvas.drag-over {
+  border-color: var(--teal2);
+  background: rgba(13,148,136,.06);
+}
+
+.fbd-panel { display: flex; flex-direction: column; gap: 12px; }
+.fbd-panel h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: .88rem; font-weight: 700;
+  color: var(--teal2);
+}
+
+/* Draggable arrow cards */
+.arrow-cards { display: flex; flex-direction: column; gap: 7px; }
+.arrow-card {
+  padding: 8px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text); font-size: .78rem;
+  cursor: grab; display: flex; align-items: center; gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color .18s, box-shadow .18s;
+  user-select: none;
+  white-space: nowrap;
+}
+.arrow-card:hover { border-color: var(--teal2); transform: translateX(-2px); }
+.arrow-card.dragging { opacity: .4; cursor: grabbing; }
+
+.arrow-card .ac-icon { font-size: 1.1rem; flex-shrink: 0; }
+.arrow-card .ac-name { font-weight: 600; }
+.arrow-card .ac-hint { font-size: .72rem; color: var(--muted); }
+.drag-hint {
+  font-size: .74rem; color: var(--muted);
+  text-align: center; padding: 6px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+.btn-clear {
+  padding: 9px; border-radius: 8px;
+  background: rgba(248,113,113,.1);
+  border: 1px solid rgba(248,113,113,.3);
+  color: var(--red); font-size: .82rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all .18s;
+}
+.btn-clear:hover { background: rgba(248,113,113,.2); }
+
+.btn-primary {
+  padding: 10px 20px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--teal), #0f766e);
+  border: none; color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: .85rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  letter-spacing: .3px;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,148,136,.4); }
+
+.fbd-feedback {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: .8rem; color: var(--muted);
+  min-height: 50px;
+}
+
+/* ── NEWTON'S LAWS DRAG-SORT ── */
+.drag-sort-area { margin-top: 20px; }
+.drag-bank {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 14px;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 52px;
+  margin-bottom: 18px;
+}
+.sort-chip {
+  padding: 7px 13px;
+  background: var(--navy3);
+  border: 1px solid var(--teal);
+  border-radius: 20px;
+  font-size: .8rem; color: var(--teal3);
+  cursor: grab; user-select: none;
+  transition: all .18s;
+  font-family: 'DM Sans', sans-serif;
+}
+.sort-chip:hover { background: var(--teal); color: var(--navy); font-weight: 600; }
+.sort-chip.dragging { opacity: .35; }
+
+.law-drop-cols {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+}
+@media(max-width:600px){ .law-drop-cols { grid-template-columns: 1fr; } }
+
+.law-drop-col h5 {
+  font-family: 'Syne', sans-serif;
+  font-size: .82rem; font-weight: 700;
+  color: var(--white); margin-bottom: 8px;
+  padding: 6px 10px;
+  background: var(--navy3);
+  border-radius: 8px;
+  text-align: center;
+}
+.law-drop-zone {
+  min-height: 90px;
+  background: var(--card2);
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start;
+  transition: border-color .2s, background .2s;
+}
+.law-drop-zone.drag-over {
+  border-color: var(--amber);
+  background: rgba(245,158,11,.06);
+}
+.sort-result-chip {
+  padding: 5px 10px; border-radius: 14px;
+  font-size: .78rem; font-family: 'DM Sans', sans-serif;
+}
+.sort-result-chip.correct { background: rgba(52,211,153,.15); border: 1px solid var(--green); color: var(--green); }
+.sort-result-chip.wrong { background: rgba(248,113,113,.1); border: 1px solid var(--red); color: var(--red); }
+
+/* ── GRAPH TAB ── */
+.graph-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.radio-group { display: flex; gap: 8px; }
+.radio-group label {
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid var(--border);
+  font-size: .8rem; cursor: pointer;
+  color: var(--muted); background: var(--card2);
+  transition: all .18s;
+}
+.radio-group input[type=radio] { display: none; }
+.radio-group input[type=radio]:checked + label {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--navy); font-weight: 600;
+}
+
+#graph-canvas {
+  width: 100%; height: 320px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: block;
+}
+
+/* ── CHALLENGE TAB ── */
+.challenge-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.challenge-card .ch-tag {
+  display: inline-block;
+  background: rgba(245,158,11,.15);
+  border: 1px solid rgba(245,158,11,.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: .72rem; color: var(--amber2);
+  font-weight: 600; margin-bottom: 10px;
+}
+.challenge-card .ch-question {
+  font-size: .9rem; color: var(--text); margin-bottom: 14px; line-height: 1.7;
+}
+.ch-input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.num-input {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px;
+  color: var(--text); font-size: .9rem;
+  font-family: 'DM Mono', monospace;
+  width: 120px;
+}
+.num-input:focus { outline: none; border-color: var(--teal2); }
+.ch-unit { color: var(--muted); font-size: .85rem; }
+.ch-result {
+  margin-top: 10px; padding: 10px 14px;
+  border-radius: 8px; font-size: .85rem;
+  display: none;
+}
+.ch-result.correct { background: rgba(52,211,153,.1); color: var(--green); border: 1px solid rgba(52,211,153,.3); }
+.ch-result.wrong { background: rgba(248,113,113,.1); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+
+.hint-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 10px;
+  color: var(--muted); font-size: .75rem;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all .18s;
+}
+.hint-btn:hover { border-color: var(--amber); color: var(--amber); }
+.hint-text { display: none; font-size: .8rem; color: var(--amber2); margin-top: 8px; }
+
+/* ── QUIZ TAB ── */
+.quiz-progress {
+  background: var(--navy2);
+  border-radius: 100px; height: 6px;
+  margin-bottom: 20px; overflow: hidden;
+}
+.quiz-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  border-radius: 100px;
+  transition: width .4s ease;
+}
+
+.quiz-q {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.quiz-q .q-num {
+  font-size: .72rem; color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 6px;
+}
+.quiz-q .q-text { font-size: .92rem; color: var(--white); margin-bottom: 14px; }
+
+.mc-options { display: flex; flex-direction: column; gap: 8px; }
+.mc-opt {
+  padding: 10px 14px;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer; font-size: .85rem;
+  color: var(--text); transition: all .18s;
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+}
+.mc-opt:hover:not(:disabled) { border-color: var(--teal2); color: var(--teal3); }
+.mc-opt.selected { background: rgba(11,148,184,.15); border-color: var(--teal2); color: var(--teal3); font-weight:600; }
+.mc-opt.correct { background: rgba(52,211,153,.12); border-color: var(--green); color: var(--green); }
+.mc-opt.wrong { background: rgba(248,113,113,.1); border-color: var(--red); color: var(--red); }
+.mc-opt:disabled { cursor: default; }
+
+.calc-q input {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px;
+  color: var(--text); font-size: .9rem;
+  font-family: 'DM Mono', monospace; width: 120px;
+}
+.calc-q input:focus { outline: none; border-color: var(--teal2); }
+
+.quiz-score-card {
+  text-align: center; padding: 40px 20px;
+  display: none;
+}
+.score-ring {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(var(--teal) 0%, var(--amber) 0%);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  position: relative;
+}
+.score-ring::before {
+  content: '';
+  position: absolute;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--card2);
+}
+.score-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem; font-weight: 800;
+  color: var(--white); z-index: 1;
+}
+.score-label { color: var(--muted); font-size: .85rem; margin-bottom: 20px; }
+.btn-restart {
+  padding: 11px 28px; border-radius: 8px;
+  background: var(--teal); border: none;
+  color: var(--navy); font-family: 'Syne', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+}
+.btn-restart:hover { background: var(--teal2); }
+
+/* ── PASSWORD GATE ── */
+#pw-gate {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+}
+.pw-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 360px; width: 90%;
+}
+.pw-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--teal2), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.pw-sub { color: var(--muted); font-size: .82rem; margin-bottom: 24px; }
+.pw-input {
+  width: 100%;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text); font-size: .95rem;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 12px; letter-spacing: 2px;
+  text-align: center;
+}
+.pw-input:focus { outline: none; border-color: var(--teal2); }
+.pw-btn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--teal), #0a6b61);
+  border: none; border-radius: 10px;
+  color: var(--white); font-family: 'Syne', sans-serif;
+  font-size: .95rem; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  letter-spacing: .4px;
+}
+.pw-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,148,136,.4); }
+.pw-err { color: var(--red); font-size: .8rem; margin-top: 8px; display: none; }
+
+/* ── TOOLTIP ── */
+.tooltip-text { display: none; position: absolute; background: var(--navy); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size:.78rem; color:var(--muted); max-width:200px; z-index:10; box-shadow: var(--shadow); }
+
+/* ── MISC ── */
+.tag {
+  display: inline-block;
+  background: rgba(13,148,136,.15);
+  border: 1px solid rgba(13,148,136,.3);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: .72rem; color: var(--teal2);
+  font-weight: 600; margin-bottom: 14px;
+}
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+.text-muted { color: var(--muted); font-size: .82rem; }
+.text-formula { font-family: 'DM Mono', monospace; color: var(--amber2); }
+
+.quiz-review-panel {
+  display: none;
+  margin-top: 24px;
+  border-top: 2px solid var(--border);
+  padding-top: 20px;
+}
+.quiz-review-panel.visible { display: block; }
+.review-q {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+}
+.review-q .rq-num { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.review-q .rq-text { font-size: .9rem; color: var(--white); margin-bottom: 10px; }
+.review-q .rq-status { font-size: .85rem; font-weight: 600; margin-bottom: 6px; }
+.review-q .rq-status.ok  { color: var(--green); }
+.review-q .rq-status.bad { color: var(--red); }
+.review-q .rq-correct { font-size: .82rem; color: var(--teal3); }
+.review-q .rq-your    { font-size: .82rem; color: var(--amber2); }
+.btn-see-results {
+  display: none;
+  width: 100%;
+  margin-top: 20px;
+  padding: 13px;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: .03em;
+  transition: background .2s;
+}
+.btn-see-results:hover { background: var(--teal2); }
+.btn-see-results.visible { display: block; }
+.btn-final-score {
+  margin-top: 20px;
+  padding: 11px 28px;
+  background: var(--amber2);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: background .2s;
+}
+.btn-final-score:hover { background: #b45309; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <div class="pw-logo">⚡ PhysicsFlow</div>
+    <div class="pw-sub">Forces &amp; Newton's Laws</div>
+    <input type="password" class="pw-input" id="pw-input" placeholder="Enter password" />
+    <button class="pw-btn" onclick="checkPassword()">Unlock App</button>
+    <div class="pw-err" id="pw-err">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-mark">PF</div>
+  <div class="header-text">
+    <h1>PhysicsFlow</h1>
+    <p>Forces &amp; Newton's Laws</p>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('learn',this)"><span class="tab-icon">📖</span> Learn</button>
+  <button class="tab-btn" onclick="showTab('simulate',this)"><span class="tab-icon">🔬</span> Simulate</button>
+  <button class="tab-btn" onclick="showTab('investigate',this)"><span class="tab-icon">🧪</span> Investigate</button>
+  <button class="tab-btn" onclick="showTab('newtons',this)"><span class="tab-icon">⚙️</span> Newton's Laws</button>
+  <button class="tab-btn" onclick="showTab('fbd',this)"><span class="tab-icon">↕️</span> FBD Builder</button>
+  <button class="tab-btn" onclick="showTab('graph',this)"><span class="tab-icon">📈</span> Graph</button>
+  <button class="tab-btn" onclick="showTab('challenge',this)"><span class="tab-icon">🏆</span> Challenge</button>
+  <button class="tab-btn" onclick="showTab('quiz',this)"><span class="tab-icon">✅</span> Quiz</button>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     TAB 1 — LEARN
+════════════════════════════════════════════ -->
+<div class="tab-content active" id="tab-learn">
+  <div class="section-title">Types of Forces</div>
+  <div class="section-sub">Every push or pull is a force. Forces have both magnitude and direction.</div>
+
+  <div class="force-grid">
+    <div class="force-tile">
+      <div class="ft-icon">⬇️</div>
+      <div class="ft-name">Weight (W)</div>
+      <div class="ft-desc">Gravitational pull on mass. W = mg. Always points downward.</div>
+    </div>
+    <div class="force-tile">
+      <div class="ft-icon">⬆️</div>
+      <div class="ft-name">Normal (N)</div>
+      <div class="ft-desc">Surface pushes back perpendicular to the contact surface.</div>
+    </div>
+    <div class="force-tile">
+      <div class="ft-icon">↔️</div>
+      <div class="ft-name">Applied (F<sub>app</sub>)</div>
+      <div class="ft-desc">External push or pull applied to an object.</div>
+    </div>
+    <div class="force-tile">
+      <div class="ft-icon">⬅️</div>
+      <div class="ft-name">Friction (F<sub>f</sub>)</div>
+      <div class="ft-desc">Opposes relative motion. Acts parallel to surface.</div>
+    </div>
+    <div class="force-tile">
+      <div class="ft-icon">🔗</div>
+      <div class="ft-name">Tension (T)</div>
+      <div class="ft-desc">Force in ropes, strings, or cables pulling objects.</div>
+    </div>
+    <div class="force-tile">
+      <div class="ft-icon">🌊</div>
+      <div class="ft-name">Drag (F<sub>D</sub>)</div>
+      <div class="ft-desc">Air or fluid resistance opposing motion.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">📐</span> Free-Body Diagram (FBD)</div>
+    <p class="text-muted" style="margin-bottom:12px;">A FBD shows all forces acting ON a single object as arrows from a point or box. The length of each arrow represents magnitude.</p>
+    <canvas id="learn-fbd" width="600" height="200" style="width:100%;height:auto;background:var(--card2);border-radius:10px;border:1px solid var(--border);"></canvas>
+    <p class="text-muted" style="margin-top:10px; font-size:.78rem;">↑ A box on a surface being pushed right with friction acting left.</p>
+  </div>
+
+  <div class="balance-row">
+    <div class="balance-card">
+      <h4>⚖️ Balanced Forces</h4>
+      <p>Net force = 0. Object stays still or moves at constant velocity. Equilibrium!</p>
+      <p style="margin-top:8px;font-family:'DM Mono',monospace;font-size:.82rem;color:var(--teal3);">F<sub>net</sub> = 0 → a = 0</p>
+    </div>
+    <div class="balance-card unbalanced">
+      <h4>⚡ Unbalanced Forces</h4>
+      <p>Net force ≠ 0. Object accelerates in direction of net force.</p>
+      <p style="margin-top:8px;font-family:'DM Mono',monospace;font-size:.82rem;color:var(--amber3);">F<sub>net</sub> ≠ 0 → a = F<sub>net</sub>/m</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 2 — SIMULATE
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-simulate">
+  <div class="section-title">Force Simulator</div>
+  <div class="section-sub">Adjust the applied force, friction, and mass. Watch how the box moves!</div>
+
+  <canvas id="sim-canvas"></canvas>
+
+  <div class="controls-grid">
+    <div class="ctrl-item">
+      <label>Applied Force (F<sub>app</sub>) <span class="ctrl-val" id="fapp-val">10 N</span></label>
+      <input type="range" id="fapp" min="0" max="50" value="10" oninput="updateSim()">
+    </div>
+    <div class="ctrl-item">
+      <label>Friction Force (F<sub>f</sub>) <span class="ctrl-val" id="ff-val">5 N</span></label>
+      <input type="range" id="ff" min="0" max="40" value="5" oninput="updateSim()">
+    </div>
+    <div class="ctrl-item">
+      <label>Mass (kg) <span class="ctrl-val" id="mass-val">5 kg</span></label>
+      <input type="range" id="mass" min="1" max="20" value="5" oninput="updateSim()">
+    </div>
+  </div>
+  <div style="margin-bottom:14px;">
+    <button class="btn-clear" onclick="resetSim()" style="padding:9px 20px;">↺ Reset Box Position</button>
+  </div>
+
+  <div class="readout-bar">
+    <div class="readout">
+      <div class="r-label">F<sub>net</sub></div>
+      <div class="r-val" id="fnet-display">5.0 N</div>
+    </div>
+    <div class="readout">
+      <div class="r-label">Acceleration</div>
+      <div class="r-val" id="acc-display">1.00 m/s²</div>
+    </div>
+    <div class="readout">
+      <div class="r-label">Status</div>
+      <div class="r-val" id="status-display" style="color:var(--amber2)">Accelerating →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 3 — INVESTIGATE
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-investigate">
+  <div class="section-title">Investigate F<sub>net</sub> = ma</div>
+  <div class="section-sub">Explore how changing force and mass affects acceleration.</div>
+
+  <div class="formula-box">
+    <div class="formula">F<sub>net</sub> = m × a</div>
+    <div class="formula-desc">Newton's Second Law — the foundation of dynamics</div>
+  </div>
+
+  <div class="inv-grid">
+    <div class="var-card">
+      <h4>📊 Fix Mass = 5 kg, Vary Force</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>F<sub>net</sub> (N)</th><th>mass (kg)</th><th>a (m/s²)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>5</td><td>5</td><td>1.0</td></tr>
+            <tr><td>10</td><td>5</td><td>2.0</td></tr>
+            <tr><td>15</td><td>5</td><td>3.0</td></tr>
+            <tr><td>20</td><td>5</td><td>4.0</td></tr>
+            <tr><td>25</td><td>5</td><td>5.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted" style="margin-top:10px;">➜ a and F<sub>net</sub> are <strong style="color:var(--teal3)">directly proportional</strong></p>
+    </div>
+
+    <div class="var-card">
+      <h4>📊 Fix Force = 20 N, Vary Mass</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>F<sub>net</sub> (N)</th><th>mass (kg)</th><th>a (m/s²)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>20</td><td>2</td><td>10.0</td></tr>
+            <tr><td>20</td><td>4</td><td>5.0</td></tr>
+            <tr><td>20</td><td>5</td><td>4.0</td></tr>
+            <tr><td>20</td><td>10</td><td>2.0</td></tr>
+            <tr><td>20</td><td>20</td><td>1.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted" style="margin-top:10px;">➜ a and mass are <strong style="color:var(--amber3)">inversely proportional</strong></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-header"><span class="icon">🎛️</span> Try It: Explore the Relationship</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="ctrl-item" style="flex:1;min-width:150px;">
+        <label>F<sub>net</sub> (N) <span class="ctrl-val" id="inv-fnet-val">20 N</span></label>
+        <input type="range" id="inv-fnet" min="1" max="100" value="20" oninput="updateInv()">
+      </div>
+      <div class="ctrl-item" style="flex:1;min-width:150px;">
+        <label>Mass (kg) <span class="ctrl-val" id="inv-mass-val">5 kg</span></label>
+        <input type="range" id="inv-mass" min="1" max="50" value="5" oninput="updateInv()">
+      </div>
+      <div class="readout" style="margin-bottom:0;flex:1;min-width:130px;">
+        <div class="r-label">Acceleration</div>
+        <div class="r-val" id="inv-acc">4.00 m/s²</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 4 — NEWTON'S LAWS
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-newtons">
+  <div class="section-title">Newton's Three Laws of Motion</div>
+  <div class="section-sub">Tap each example to reveal which law it demonstrates.</div>
+
+  <div class="law-card">
+    <div class="law-num">First Law</div>
+    <div class="law-title">Law of Inertia</div>
+    <div class="law-statement">"An object at rest stays at rest, and an object in motion stays in motion at constant velocity, unless acted on by an unbalanced force."</div>
+    <p class="text-muted" style="font-size:.82rem;margin-bottom:10px;">Examples — click to confirm:</p>
+    <div class="examples-list">
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🚗 Car suddenly brakes — passengers lurch forward</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">⚽ Ball rolling on frictionless ice</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">📚 Book sitting still on a desk</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🛸 Spacecraft coasting in space</span>
+    </div>
+  </div>
+
+  <div class="law-card">
+    <div class="law-num">Second Law</div>
+    <div class="law-title">F<sub>net</sub> = ma</div>
+    <div class="law-statement">"The acceleration of an object is directly proportional to the net force and inversely proportional to its mass."</div>
+    <p class="text-muted" style="font-size:.82rem;margin-bottom:10px;">Examples — click to confirm:</p>
+    <div class="examples-list">
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🚀 Rocket burns fuel — accelerates faster as mass drops</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🛒 Full shopping cart is harder to push</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🏎️ F1 car — light body + huge engine = high acceleration</span>
+    </div>
+  </div>
+
+  <div class="law-card">
+    <div class="law-num">Third Law</div>
+    <div class="law-title">Action &amp; Reaction</div>
+    <div class="law-statement">"For every action there is an equal and opposite reaction force acting on a different object."</div>
+    <p class="text-muted" style="font-size:.82rem;margin-bottom:10px;">Examples — click to confirm:</p>
+    <div class="examples-list">
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🚀 Rocket exhaust pushes down → rocket goes up</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🏊 Swimmer pushes wall → wall pushes swimmer</span>
+      <span class="example-chip" onclick="this.classList.toggle('selected')">🦆 Bird wings push air down → air pushes bird up</span>
+    </div>
+  </div>
+
+  <div class="drag-sort-area card">
+    <div class="card-header"><span class="icon">🎯</span> Drag-and-Sort Challenge</div>
+    <p class="text-muted" style="margin-bottom:12px;font-size:.83rem;">Drag each example into the correct Newton's Law column.</p>
+    <div class="drag-bank" id="sort-bank"></div>
+    <div class="law-drop-cols">
+      <div class="law-drop-col">
+        <h5>1st Law — Inertia</h5>
+        <div class="law-drop-zone" id="drop-first" data-law="first"></div>
+      </div>
+      <div class="law-drop-col">
+        <h5>2nd Law — F=ma</h5>
+        <div class="law-drop-zone" id="drop-second" data-law="second"></div>
+      </div>
+      <div class="law-drop-col">
+        <h5>3rd Law — Action/Reaction</h5>
+        <div class="law-drop-zone" id="drop-third" data-law="third"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="checkSort()">✓ Check Sort</button>
+      <button class="btn-clear" onclick="resetSort()">↺ Reset</button>
+    </div>
+    <div id="sort-feedback" class="fbd-feedback" style="margin-top:12px;">Drag all 6 cards into the columns, then click Check Sort.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 5 — FBD BUILDER
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-fbd">
+  <div class="section-title">Free-Body Diagram Builder</div>
+  <div class="section-sub">Select a scenario, then drag force arrows onto the object.</div>
+
+  <!-- Scenario selector row -->
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+    <span style="font-size:.82rem;color:var(--muted);font-weight:500;">Scenario:</span>
+    <select id="fbd-scenario" style="background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;" onchange="loadFBDScenario()">
+      <option value="rest">Box at rest on surface</option>
+      <option value="push">Box being pushed right</option>
+      <option value="hang">Object hanging from rope</option>
+      <option value="skydive">Skydiver in air</option>
+    </select>
+    <button class="btn-primary" onclick="checkFBD()" style="padding:7px 16px;font-size:.82rem;">✓ Check</button>
+    <button class="btn-clear" onclick="resetFBD()" style="padding:7px 14px;font-size:.82rem;">↺ Reset</button>
+  </div>
+
+  <!-- Arrow card bank — horizontal, above canvas -->
+  <div style="margin-bottom:12px;">
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">🎨 Drag a force arrow onto the canvas:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;" id="arrow-cards">
+      <div class="arrow-card" id="acard-W"    draggable="true" data-type="W"    ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">⬇️</span><div><div class="ac-name">Weight</div><div class="ac-hint">W = mg</div></div></div>
+      <div class="arrow-card" id="acard-N"    draggable="true" data-type="N"    ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">⬆️</span><div><div class="ac-name">Normal</div><div class="ac-hint">Surface</div></div></div>
+      <div class="arrow-card" id="acard-Fapp" draggable="true" data-type="Fapp" ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">➡️</span><div><div class="ac-name">Applied</div><div class="ac-hint">F<sub>app</sub></div></div></div>
+      <div class="arrow-card" id="acard-Ff"   draggable="true" data-type="Ff"   ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">⬅️</span><div><div class="ac-name">Friction</div><div class="ac-hint">F<sub>f</sub></div></div></div>
+      <div class="arrow-card" id="acard-T"    draggable="true" data-type="T"    ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">⬆️</span><div><div class="ac-name">Tension</div><div class="ac-hint">T</div></div></div>
+      <div class="arrow-card" id="acard-Fd"   draggable="true" data-type="Fd"   ondragstart="fbdDragStart(event)" ondragend="fbdDragEnd(event)"><span class="ac-icon">🔼</span><div><div class="ac-name">Air Drag</div><div class="ac-hint">F<sub>D</sub></div></div></div>
+    </div>
+  </div>
+
+  <!-- Canvas -->
+  <canvas id="fbd-canvas" width="700" height="380"
+    style="width:100%;background:var(--card2);border:2px dashed var(--border);border-radius:var(--radius);display:block;cursor:crosshair;transition:border-color .2s;"
+    ondragover="fbdDragOver(event)"
+    ondragleave="fbdDragLeave(event)"
+    ondrop="fbdDrop(event)">
+  </canvas>
+
+  <!-- Feedback -->
+  <div class="fbd-feedback" id="fbd-feedback" style="margin-top:12px;">Drag force arrows onto the object to build your FBD.</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 6 — GRAPH
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-graph">
+  <div class="section-title">Force &amp; Motion Graphs</div>
+  <div class="section-sub">Explore how graphs reveal the relationships in Newton's 2nd Law.</div>
+
+  <div class="graph-controls">
+    <span style="font-size:.85rem;color:var(--muted);">Graph type:</span>
+    <div class="radio-group">
+      <input type="radio" id="g1" name="gtype" value="FvsA" checked onchange="drawGraph()">
+      <label for="g1">Force vs Acceleration</label>
+      <input type="radio" id="g2" name="gtype" value="MvsA" onchange="drawGraph()">
+      <label for="g2">Mass vs Acceleration</label>
+      <input type="radio" id="g3" name="gtype" value="FvsM" onchange="drawGraph()">
+      <label for="g3">Force vs Mass (const. a)</label>
+    </div>
+    <div class="ctrl-item" style="width:180px;margin:0;">
+      <label>Fixed value <span class="ctrl-val" id="g-fixed-val">5 kg</span></label>
+      <input type="range" id="g-fixed" min="1" max="20" value="5" oninput="drawGraph()">
+    </div>
+  </div>
+
+  <canvas id="graph-canvas" width="800" height="320"></canvas>
+  <p class="text-muted" style="margin-top:10px;font-size:.78rem;" id="graph-caption">Force vs. Acceleration at constant mass (5 kg) — slope = mass</p>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 7 — CHALLENGE
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-challenge">
+  <div class="section-title">Real-World Challenges</div>
+  <div class="section-sub">Apply Newton's Laws to solve these scenarios. Enter your answer and check!</div>
+
+  <div class="challenge-card">
+    <div class="ch-tag">⭐ Level 1</div>
+    <div class="ch-question">
+      🛒 A shopping cart has a mass of <strong>12 kg</strong>. A net force of <strong>36 N</strong> acts on it.<br>
+      What is the cart's acceleration?
+    </div>
+    <div class="ch-input-row">
+      <input type="number" class="num-input" id="ch1-ans" placeholder="0.00">
+      <span class="ch-unit">m/s²</span>
+      <button class="btn-primary" onclick="checkChallenge(1, 3, 'ch1')">Check</button>
+      <button class="hint-btn" onclick="toggleHint('ch1-hint')">💡 Hint</button>
+    </div>
+    <div class="hint-text" id="ch1-hint">Use F = ma → a = F/m = 36/12</div>
+    <div class="ch-result" id="ch1-result"></div>
+  </div>
+
+  <div class="challenge-card">
+    <div class="ch-tag">⭐ Level 1</div>
+    <div class="ch-question">
+      🚗 A car of mass <strong>1200 kg</strong> accelerates at <strong>2.5 m/s²</strong>.<br>
+      What is the net force acting on it?
+    </div>
+    <div class="ch-input-row">
+      <input type="number" class="num-input" id="ch2-ans" placeholder="0">
+      <span class="ch-unit">N</span>
+      <button class="btn-primary" onclick="checkChallenge(2, 3000, 'ch2')">Check</button>
+      <button class="hint-btn" onclick="toggleHint('ch2-hint')">💡 Hint</button>
+    </div>
+    <div class="hint-text" id="ch2-hint">F = ma = 1200 × 2.5</div>
+    <div class="ch-result" id="ch2-result"></div>
+  </div>
+
+  <div class="challenge-card">
+    <div class="ch-tag">⭐⭐ Level 2</div>
+    <div class="ch-question">
+      📦 A box is pushed with 40 N to the right. Friction is 15 N to the left. The box has mass <strong>5 kg</strong>.<br>
+      What is the acceleration?
+    </div>
+    <div class="ch-input-row">
+      <input type="number" class="num-input" id="ch3-ans" placeholder="0.0">
+      <span class="ch-unit">m/s²</span>
+      <button class="btn-primary" onclick="checkChallenge(3, 5, 'ch3')">Check</button>
+      <button class="hint-btn" onclick="toggleHint('ch3-hint')">💡 Hint</button>
+    </div>
+    <div class="hint-text" id="ch3-hint">F<sub>net</sub> = 40 − 15 = 25 N, then a = F<sub>net</sub>/m = 25/5</div>
+    <div class="ch-result" id="ch3-result"></div>
+  </div>
+
+  <div class="challenge-card">
+    <div class="ch-tag">⭐⭐ Level 2</div>
+    <div class="ch-question">
+      🏋️ A weightlifter holds a barbell of weight <strong>600 N</strong> stationary above their head.<br>
+      What is the force exerted by their hands on the barbell?
+    </div>
+    <div class="ch-input-row">
+      <input type="number" class="num-input" id="ch4-ans" placeholder="0">
+      <span class="ch-unit">N</span>
+      <button class="btn-primary" onclick="checkChallenge(4, 600, 'ch4')">Check</button>
+      <button class="hint-btn" onclick="toggleHint('ch4-hint')">💡 Hint</button>
+    </div>
+    <div class="hint-text" id="ch4-hint">Object is stationary → balanced forces → F<sub>hands</sub> = Weight = 600 N</div>
+    <div class="ch-result" id="ch4-result"></div>
+  </div>
+
+  <div class="challenge-card">
+    <div class="ch-tag">⭐⭐⭐ Level 3</div>
+    <div class="ch-question">
+      🚀 A rocket has a mass of <strong>800 kg</strong> and its engines produce a thrust of <strong>12000 N</strong> upward.<br>
+      Given g = 10 m/s², what is the rocket's upward acceleration? (Hint: weight acts downward)
+    </div>
+    <div class="ch-input-row">
+      <input type="number" class="num-input" id="ch5-ans" placeholder="0.0">
+      <span class="ch-unit">m/s²</span>
+      <button class="btn-primary" onclick="checkChallenge(5, 5, 'ch5')">Check</button>
+      <button class="hint-btn" onclick="toggleHint('ch5-hint')">💡 Hint</button>
+    </div>
+    <div class="hint-text" id="ch5-hint">W = 800×10 = 8000 N, F<sub>net</sub> = 12000 − 8000 = 4000 N, a = 4000/800 = 5 m/s²</div>
+    <div class="ch-result" id="ch5-result"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 8 — QUIZ
+════════════════════════════════════════════ -->
+<div class="tab-content" id="tab-quiz">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+    <div>
+      <div class="section-title">Self-Marking Quiz</div>
+      <div class="section-sub" style="margin-bottom:0;">8 questions — answer all, then click Check Answers.</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div id="quiz-progress-label" style="font-size:.82rem;color:var(--muted);">0 / 8 answered</div>
+      <button class="btn-see-results" id="btn-see-results" onclick="showReview()" style="display:none;margin:0;width:auto;padding:9px 18px;">✓ Check Answers</button>
+      <button class="btn-clear" onclick="restartQuiz()" style="padding:9px 16px;font-size:.85rem;">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="quiz-progress" style="margin-bottom:20px;">
+    <div class="quiz-bar" id="quiz-bar" style="width:0%"></div>
+  </div>
+
+  <div id="quiz-questions"></div>
+  <div class="quiz-review-panel" id="quiz-review"></div>
+  <div class="quiz-score-card" id="quiz-score">
+    <div class="score-ring">
+      <div class="score-num" id="score-num">0/8</div>
+    </div>
+    <div class="section-title" style="font-size:1.3rem;" id="score-title">Quiz Complete!</div>
+    <div class="score-label" id="score-label">Well done!</div>
+    <button class="btn-restart" onclick="restartQuiz()">↺ Reset Quiz</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   PASSWORD
+══════════════════════════════════ */
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const PASS_HASH = ''; // set below
+let appUnlocked = false;
+
+// Pre-hash the password FORCES2026
+(async()=>{
+  // password: FORCES2026
+  const h = await sha256('FORCES2026');
+  window._pwHash = h;
+})();
+
+async function checkPassword() {
+  const val = document.getElementById('pw-input').value;
+  const h = await sha256(val);
+  if (h === window._pwHash) {
+    document.getElementById('pw-gate').style.display = 'none';
+    appUnlocked = true;
+    initAll();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw-input').style.borderColor = 'var(--red)';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') checkPassword(); });
+
+/* ══════════════════════════════════
+   TABS
+══════════════════════════════════ */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='simulate') initSimCanvas();
+  if(id==='fbd') initFBDCanvas();
+  if(id==='graph') drawGraph();
+  if(id==='quiz') {
+    const qc = document.getElementById('quiz-questions');
+    if(!qc.hasChildNodes() || qc.style.display === 'none') initQuiz();
+  }
+}
+
+/* ══════════════════════════════════
+   INIT ALL
+══════════════════════════════════ */
+function initAll() {
+  drawLearnFBD();
+  updateSim();
+  updateInv();
+  initDragSort();
+  initQuiz();
+  drawGraph();
+}
+
+/* ══════════════════════════════════
+   TAB 1 — LEARN FBD DIAGRAM
+══════════════════════════════════ */
+// Helper: arrow with subscript label for canvas
+function canvasArrowSub(ctx, x1,y1,x2,y2,color,base,sub) {
+  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len, uy=dy/len;
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const ax=x2-ux*10-uy*5, ay=y2-uy*10+ux*5;
+  const bx2=x2-ux*10+uy*5, by2=y2-uy*10-ux*5;
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(ax,ay); ctx.lineTo(bx2,by2); ctx.closePath(); ctx.fill();
+  const lx=x2+ux*16, ly=y2+uy*16;
+  ctx.font='bold 11px DM Mono'; ctx.textAlign='center';
+  if(sub) {
+    const bw = ctx.measureText(base).width;
+    ctx.fillText(base, lx - bw/2, ly);
+    ctx.font='bold 8px DM Mono';
+    ctx.textAlign='left';
+    ctx.fillText(sub, lx - bw/2 + bw, ly + 3);
+  } else {
+    ctx.fillText(base, lx, ly);
+  }
+}
+
+function drawLearnFBD() {
+  const c = document.getElementById('learn-fbd');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle = '#162540';
+  ctx.fillRect(0,0,W,H);
+
+  // Ground line
+  ctx.strokeStyle = '#7a93b8';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(50,140); ctx.lineTo(W-50,140); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Box
+  const bx=W/2-30, by=100;
+  ctx.fillStyle = '#1e3a5f';
+  ctx.strokeStyle = '#0d9488';
+  ctx.lineWidth = 2;
+  ctx.fillRect(bx,by,60,40);
+  ctx.strokeRect(bx,by,60,40);
+  ctx.fillStyle = '#5eead4';
+  ctx.font = '12px DM Mono';
+  ctx.textAlign='center';
+  ctx.fillText('m', W/2, 124);
+
+  function arrow(x1,y1,x2,y2,color,label) {
+    const dx=x2-x1, dy=y2-y1;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    const ux=dx/len, uy=dy/len;
+    ctx.strokeStyle=color; ctx.fillStyle=color;
+    ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    // arrowhead
+    const ax=x2-ux*10-uy*5, ay=y2-uy*10+ux*5;
+    const bxa=x2-ux*10+uy*5, bya=y2-uy*10-ux*5;
+    ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(ax,ay); ctx.lineTo(bxa,bya); ctx.closePath(); ctx.fill();
+    ctx.font='bold 11px DM Mono';
+    ctx.textAlign='center';
+    ctx.fillText(label, x2+ux*16+uy*0, y2+uy*16+ux*0);
+  }
+
+  // Weight
+  arrow(W/2,140, W/2,185, '#f87171','W');
+  // Normal
+  arrow(W/2,100, W/2,55, '#34d399','N');
+  // Applied
+  arrowSub(bx+60,120, bx+115,120,'#fbbf24','F','app');
+  // Friction
+  arrowSub(bx,120, bx-55,120,'#60a5fa','F','f');
+}
+
+/* ══════════════════════════════════
+   TAB 2 — SIMULATE
+══════════════════════════════════ */
+let simAnimId = null, boxX = 200, boxVel = 0, simRunning=false;
+
+function initSimCanvas() {
+  if(simRunning) return;
+  simRunning = true;
+  boxX = 200; boxVel = 0;
+  animateSim();
+}
+
+function resetSim() {
+  boxX = 200; boxVel = 0;
+  document.getElementById('fapp').value = 10;
+  document.getElementById('ff').value = 5;
+  document.getElementById('mass').value = 5;
+  updateSim();
+}
+
+function updateSim() {
+  const fapp = +document.getElementById('fapp').value;
+  const ff = +document.getElementById('ff').value;
+  const m = +document.getElementById('mass').value;
+  document.getElementById('fapp-val').textContent = fapp+' N';
+  document.getElementById('ff-val').textContent = ff+' N';
+  document.getElementById('mass-val').textContent = m+' kg';
+  const fnet = fapp - ff;
+  const acc = fnet / m;
+  document.getElementById('fnet-display').textContent = fnet.toFixed(1)+' N';
+  document.getElementById('acc-display').textContent = acc.toFixed(2)+' m/s²';
+  const stat = fnet > 0 ? 'Accelerating →' : fnet < 0 ? '← Decelerating' : 'Equilibrium';
+  const statEl = document.getElementById('status-display');
+  statEl.textContent = stat;
+  statEl.style.color = fnet>0 ? 'var(--green)' : fnet<0 ? 'var(--red)' : 'var(--amber2)';
+}
+
+function drawSimCanvas() {
+  const c = document.getElementById('sim-canvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth; c.height = c.offsetHeight;
+  const W=c.width, H=c.height;
+
+  ctx.fillStyle='#111e33'; ctx.fillRect(0,0,W,H);
+
+  const fapp = +document.getElementById('fapp').value;
+  const ff = +document.getElementById('ff').value;
+  const m = +document.getElementById('mass').value;
+  const fnet = fapp - ff;
+  const acc = fnet/m;
+
+  // Ground line at 65% — gives equal space above AND below the box for arrows
+  const groundY = Math.floor(H * 0.65);
+  ctx.strokeStyle='#2a4a7f'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+  // Hatching below ground
+  ctx.strokeStyle='#1a3050'; ctx.lineWidth=1;
+  for(let x=0; x<W+30; x+=20) {
+    ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x-22, groundY+22); ctx.stroke();
+  }
+
+  // Fixed box size, sitting on the ground line
+  const bsize = 54;
+  const by = groundY - bsize;
+  const bxClamped = Math.max(bsize + 90, Math.min(W - bsize - 90, boxX));
+  const cx = bxClamped + bsize/2;
+  const cy = by + bsize/2;
+
+  // Available space in each direction (with label padding)
+  const spaceAbove = by - 32;
+  const spaceBelow = H - groundY - 32;   // generous: 300*0.35 - 32 ≈ 73px
+  const spaceRight = W - (bxClamped + bsize) - 85;
+  const spaceLeft  = bxClamped - 85;
+
+  // Arrow px lengths — proportional, capped to available space
+  const vMax = Math.min(spaceAbove, spaceBelow); // use same scale for N and W so they match
+  const nLen = Math.max(10, Math.min(m * 10 * 0.4, vMax));
+  const wLen = Math.max(10, Math.min(m * 10 * 0.4, spaceBelow));
+  const faLen = fapp > 0 ? Math.max(10, Math.min(fapp * 1.6, spaceRight)) : 0;
+  const ffLen = ff   > 0 ? Math.max(10, Math.min(ff   * 1.6, spaceLeft))  : 0;
+
+  function drawArrow(x1,y1,x2,y2,color,base,sub,mag) {
+    if(mag===0) return;
+    const dx=x2-x1, dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy);
+    if(len<4) return;
+    const ux=dx/len, uy=dy/len;
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    const ax=x2-ux*10-uy*5, ay=y2-uy*10+ux*5;
+    const bxd=x2-ux*10+uy*5, byd=y2-uy*10-ux*5;
+    ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(ax,ay); ctx.lineTo(bxd,byd); ctx.closePath(); ctx.fill();
+    const lx=x2+ux*20, ly=y2+uy*20;
+    ctx.fillStyle=color;
+    if(sub) {
+      ctx.font='bold 11px DM Mono'; ctx.textAlign='left';
+      const bw=ctx.measureText(base).width;
+      ctx.fillText(base, lx-bw/2, ly);
+      ctx.font='bold 8px DM Mono';
+      ctx.fillText(sub, lx-bw/2+bw, ly+3);
+    } else {
+      ctx.font='bold 11px DM Mono'; ctx.textAlign='center';
+      ctx.fillText(base, lx, ly);
+    }
+    ctx.font='10px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(mag+'N', lx, ly+13);
+  }
+
+  // Draw box
+  ctx.fillStyle='#162847';
+  ctx.strokeStyle='#0d9488'; ctx.lineWidth=2;
+  ctx.fillRect(bxClamped, by, bsize, bsize);
+  ctx.strokeRect(bxClamped, by, bsize, bsize);
+  ctx.fillStyle='#5eead4'; ctx.font='bold 12px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(m+' kg', cx, cy+5);
+
+  // Normal — from top of box upward
+  drawArrow(cx, by,            cx, by - nLen,                '#34d399', 'N',  '',    m*10);
+  // Weight — from bottom of box downward, passes through ground line (physically correct)
+  drawArrow(cx, by + bsize,    cx, by + bsize + wLen,        '#f87171', 'W',  '',    m*10);
+  // Applied — from right edge rightward
+  if(fapp>0) drawArrow(bxClamped+bsize, cy, bxClamped+bsize+faLen, cy,  '#fbbf24', 'F',   'app', fapp);
+  // Friction — from left edge leftward
+  if(ff>0)   drawArrow(bxClamped,       cy, bxClamped-ffLen,       cy,  '#60a5fa', 'F',   'f',   ff);
+
+  // Velocity trail dots
+  if(Math.abs(boxVel) > 0.3) {
+    ctx.fillStyle = fnet>0 ? 'rgba(251,191,36,.18)' : 'rgba(96,165,250,.18)';
+    for(let i=1;i<=3;i++) {
+      const tx = bxClamped - boxVel*i*6;
+      if(tx>0 && tx<W) {
+        ctx.beginPath();
+        ctx.arc(tx+bsize/2, cy, 5-i, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+
+  boxVel += acc * 0.016;
+  boxVel *= 0.985;
+  boxX += boxVel * 1.2;
+  if(boxX < bsize+90) { boxX = bsize+90; boxVel=0; }
+  if(boxX > W-bsize-90) { boxX = W-bsize-90; boxVel=0; }
+}
+
+function animateSim() {
+  drawSimCanvas();
+  simAnimId = requestAnimationFrame(animateSim);
+}
+
+/* ══════════════════════════════════
+   TAB 3 — INVESTIGATE
+══════════════════════════════════ */
+function updateInv() {
+  const f = +document.getElementById('inv-fnet').value;
+  const m = +document.getElementById('inv-mass').value;
+  document.getElementById('inv-fnet-val').textContent = f+' N';
+  document.getElementById('inv-mass-val').textContent = m+' kg';
+  document.getElementById('inv-acc').textContent = (f/m).toFixed(2)+' m/s²';
+}
+
+/* ══════════════════════════════════
+   TAB 4 — LAW QUIZ + DRAG SORT
+══════════════════════════════════ */
+/* ── Drag-Sort ── */
+const sortItems = [
+  { text: '🚗 Passenger lurches forward when bus brakes', law: 'first' },
+  { text: '🏋️ Same mass + bigger force = bigger acceleration', law: 'second' },
+  { text: '🦶 Foot pushes ground → ground pushes foot', law: 'third' },
+  { text: '🏒 Hockey puck keeps sliding on smooth ice', law: 'first' },
+  { text: '🛒 Full cart accelerates less than empty cart', law: 'second' },
+  { text: '🚀 Rocket pushes gas down → gas pushes rocket up', law: 'third' },
+];
+
+let sortDragged = null;
+
+function initDragSort() {
+  const bank = document.getElementById('sort-bank');
+  if(!bank) return;
+  bank.innerHTML = '';
+  // Shuffle
+  const shuffled = [...sortItems].sort(()=>Math.random()-.5);
+  shuffled.forEach((item, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'sort-chip';
+    chip.draggable = true;
+    chip.textContent = item.text;
+    chip.dataset.law = item.law;
+    chip.addEventListener('dragstart', e => {
+      sortDragged = chip;
+      chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    bank.appendChild(chip);
+  });
+  // Drop zones
+  document.querySelectorAll('.law-drop-zone').forEach(zone => {
+    zone.innerHTML = '';
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if(sortDragged) zone.appendChild(sortDragged);
+      sortDragged = null;
+    });
+  });
+  // Bank also accepts drops back
+  bank.addEventListener('dragover', e => e.preventDefault());
+  bank.addEventListener('drop', e => {
+    e.preventDefault();
+    if(sortDragged) bank.appendChild(sortDragged);
+    sortDragged = null;
+  });
+  document.getElementById('sort-feedback').style.color = 'var(--muted)';
+  document.getElementById('sort-feedback').textContent = 'Drag all 6 cards into the columns, then click Check Sort.';
+}
+
+function checkSort() {
+  let correct = 0, total = 0;
+  document.querySelectorAll('.law-drop-zone').forEach(zone => {
+    const expected = zone.dataset.law;
+    zone.querySelectorAll('.sort-chip').forEach(chip => {
+      total++;
+      const cls = chip.dataset.law === expected ? 'correct' : 'wrong';
+      chip.classList.add(cls);
+      if(cls === 'correct') correct++;
+    });
+  });
+  const fb = document.getElementById('sort-feedback');
+  if(total === 0) { fb.textContent = 'Drag the cards into the columns first!'; return; }
+  fb.style.color = correct===total ? 'var(--green)' : 'var(--amber2)';
+  fb.textContent = correct===total
+    ? `✅ Perfect! All ${total} cards sorted correctly.`
+    : `${correct}/${total} correct. Wrong cards are highlighted red — drag them to the right column.`;
+}
+
+function resetSort() {
+  initDragSort();
+}
+
+/* ══════════════════════════════════
+   TAB 5 — FBD BUILDER (Drag & Drop)
+══════════════════════════════════ */
+let fbdArrows = [];
+let fbdDragType = null;
+let fbdCtx;
+
+const arrowDefs = {
+  W:   { label:'W',     sub:'',    dir: [0, 1],  color:'#f87171' },
+  N:   { label:'N',     sub:'',    dir: [0,-1],  color:'#34d399' },
+  Fapp:{ label:'F',     sub:'app', dir: [1, 0],  color:'#fbbf24' },
+  Ff:  { label:'F',     sub:'f',   dir:[-1, 0],  color:'#60a5fa' },
+  T:   { label:'T',     sub:'',    dir:[0,-1],   color:'#a78bfa' },
+  Fd:  { label:'F',     sub:'D',   dir:[0, -1],  color:'#fb923c' },
+};
+
+const scenarioCorrect = {
+  rest:    ['W','N'],
+  push:    ['W','N','Fapp','Ff'],
+  hang:    ['W','T'],
+  skydive: ['W','Fd'],
+};
+
+function fbdDragStart(e) {
+  const type = e.currentTarget.dataset.type;
+  fbdDragType = type;
+  e.dataTransfer.effectAllowed = 'copy';
+  e.currentTarget.classList.add('dragging');
+}
+
+function fbdDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+}
+
+function fbdDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  const c = document.getElementById('fbd-canvas');
+  if(c) c.classList.add('drag-over');
+}
+
+function fbdDragLeave(e) {
+  const c = document.getElementById('fbd-canvas');
+  if(c) c.classList.remove('drag-over');
+}
+
+function fbdDrop(e) {
+  e.preventDefault();
+  const c = document.getElementById('fbd-canvas');
+  if(c) c.classList.remove('drag-over');
+  if(!fbdDragType) return;
+  const already = fbdArrows.find(a=>a.type===fbdDragType);
+  if(!already) {
+    fbdArrows.push({ type: fbdDragType });
+    // Mark card as placed and disable dragging
+    const card = document.getElementById('acard-'+fbdDragType);
+    // card stays active — no dimming
+  }
+  fbdDragType = null;
+  drawFBD();
+  const fb = document.getElementById('fbd-feedback');
+  if(fb) { fb.style.color = 'var(--muted)'; fb.textContent = `${fbdArrows.length} force(s) placed. Click ✓ Check when done.`; }
+}
+
+function initFBDCanvas() {
+  const c = document.getElementById('fbd-canvas');
+  if(!c) return;
+  fbdCtx = c.getContext('2d');
+  resizeFBDCanvas(c);
+  drawFBD();
+}
+
+function resizeFBDCanvas(c) {
+  if(!c) c = document.getElementById('fbd-canvas');
+  if(!c) return;
+  const rect = c.getBoundingClientRect();
+  const w = rect.width > 0 ? Math.round(rect.width) : (c.parentElement ? c.parentElement.clientWidth : 700) || 700;
+  c.width  = w;
+  c.height = 380;
+}
+function loadFBDScenario() {
+  fbdArrows = [];
+  document.querySelectorAll('.arrow-card').forEach(c=>{
+  });
+  const fb = document.getElementById('fbd-feedback');
+  if(fb) { fb.style.color = 'var(--muted)'; fb.textContent = 'Drag force arrows onto the object to build your FBD.'; }
+  drawFBD();
+}
+
+function resetFBD() {
+  fbdArrows = [];
+  document.querySelectorAll('.arrow-card').forEach(c => c.classList.remove('dragging'));
+  const sel = document.getElementById('fbd-scenario');
+  if(sel) sel.value = 'rest';
+  const fb = document.getElementById('fbd-feedback');
+  if(fb) { fb.style.color = 'var(--muted)'; fb.textContent = 'Drag force arrows onto the object to build your FBD.'; }
+  drawFBD();
+}
+
+function drawFBD() {
+  const c = document.getElementById('fbd-canvas');
+  if(!c) return;
+  if(!fbdCtx) { fbdCtx = c.getContext('2d'); }
+  resizeFBDCanvas(c);
+  const ctx = fbdCtx;
+  const W=c.width, H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#111e33'; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(30,58,95,.4)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  const scenario = document.getElementById('fbd-scenario')?.value || 'rest';
+  const cx=W/2, cy=H/2;
+
+  // Ground line for surface scenarios
+  if(scenario==='rest'||scenario==='push') {
+    ctx.strokeStyle='#7a93b8'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(50,cy+40); ctx.lineTo(W-50,cy+40); ctx.stroke();
+    ctx.setLineDash([]);
+    for(let x=50;x<W-50;x+=20) {
+      ctx.strokeStyle='rgba(122,147,184,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,cy+40); ctx.lineTo(x-12,cy+56); ctx.stroke();
+    }
+  }
+
+  // Object
+  ctx.fillStyle='#162847';
+  ctx.strokeStyle='#0d9488'; ctx.lineWidth=2.5;
+  ctx.fillRect(cx-35,cy-35,70,70);
+  ctx.strokeRect(cx-35,cy-35,70,70);
+  ctx.fillStyle='#5eead4'; ctx.font='bold 13px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('Object', cx, cy+5);
+
+  // Scenario label
+  const labels = { rest:'Box at rest on surface', push:'Box pushed right (friction)', hang:'Object hanging from rope', skydive:'Skydiver in air' };
+  ctx.fillStyle='rgba(122,147,184,.6)'; ctx.font='13px DM Sans'; ctx.textAlign='left';
+  ctx.fillText(labels[scenario]||'', 16, 24);
+
+  // Draw placed arrows
+  fbdArrows.forEach(a => {
+    const def = arrowDefs[a.type];
+    const len = 75;
+    const nx = def.dir[0], ny = def.dir[1];
+    const mag = Math.sqrt(nx*nx+ny*ny);
+    const ux = nx/mag, uy = ny/mag;
+    const sx = cx + ux*35;
+    const sy = cy + uy*35;
+    const ex = cx + ux*(35+len);
+    const ey = cy + uy*(35+len);
+    drawFBDArrow(ctx, sx, sy, ex, ey, def.color, def.label, def.sub);
+  });
+
+  // Drop hint
+  if(fbdArrows.length===0) {
+    ctx.fillStyle='rgba(122,147,184,.25)'; ctx.font='13px DM Sans'; ctx.textAlign='center';
+    ctx.fillText('← Drag force arrows here', W/2, H-18);
+  }
+}
+
+function drawFBDArrow(ctx, x1,y1,x2,y2,color,label,sub) {
+  const dx=x2-x1, dy=y2-y1;
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len, uy=dy/len;
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const ax=x2-ux*12-uy*6, ay=y2-uy*12+ux*6;
+  const bxa=x2-ux*12+uy*6, bya=y2-uy*12-ux*6;
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(ax,ay); ctx.lineTo(bxa,bya); ctx.closePath(); ctx.fill();
+  // Draw label with optional subscript
+  const lx = x2+ux*22, ly = y2+uy*22;
+  ctx.fillStyle = color;
+  if(sub) {
+    ctx.font = 'bold 13px DM Mono'; ctx.textAlign = 'left';
+    const baseW = ctx.measureText(label).width;
+    ctx.fillText(label, lx - baseW/2 - ctx.measureText(sub).width/4, ly);
+    ctx.font = 'bold 10px DM Mono';
+    ctx.fillText(sub, lx - baseW/2 - ctx.measureText(sub).width/4 + baseW, ly + 4);
+  } else {
+    ctx.font = 'bold 13px DM Mono'; ctx.textAlign = 'center';
+    ctx.fillText(label, lx, ly);
+  }
+}
+
+function checkFBD() {
+  const scenarioEl = document.getElementById('fbd-scenario');
+  const fb = document.getElementById('fbd-feedback');
+  if(!scenarioEl || !fb) return;
+  const scenario = scenarioEl.value;
+  const correct = scenarioCorrect[scenario];
+  const placed = fbdArrows.map(a=>a.type);
+  const missing = correct.filter(f=>!placed.includes(f));
+  const extra = placed.filter(p=>!correct.includes(p));
+  const nameMap = { W:'Weight (W)', N:'Normal (N)', Fapp:'Applied (F<sub>app</sub>)', Ff:'Friction (F<sub>f</sub>)', T:'Tension (T)', Fd:'Air Drag (F<sub>D</sub>)' };
+  const readable = keys => keys.map(k=>nameMap[k]||k).join(', ');
+  if(missing.length===0 && extra.length===0) {
+    fb.style.color='var(--green)';
+    fb.innerHTML = '✅ Correct! All required forces placed accurately.';
+  } else {
+    fb.style.color='var(--amber2)';
+    let msg = '';
+    if(missing.length) msg += `Missing: ${readable(missing)}. `;
+    if(extra.length) msg += `Extra forces not needed: ${readable(extra)}.`;
+    fb.innerHTML = '⚠️ ' + msg;
+  }
+}
+
+/* ══════════════════════════════════
+   TAB 6 — GRAPH
+══════════════════════════════════ */
+function drawGraph() {
+  const c = document.getElementById('graph-canvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth || 800;
+  c.height = 320;
+  const W=c.width, H=c.height;
+  const gtype = document.querySelector('input[name="gtype"]:checked')?.value || 'FvsA';
+  const fixed = +document.getElementById('g-fixed').value;
+  const fixedEl = document.getElementById('g-fixed-val');
+
+  ctx.fillStyle='#111e33'; ctx.fillRect(0,0,W,H);
+
+  const pad = {l:60, r:30, t:30, b:50};
+  const gW = W-pad.l-pad.r, gH = H-pad.t-pad.b;
+
+  // Fixed axis ranges — never change with the slider
+  // Only the line shape changes
+  let xLabel='', yLabel='', caption='';
+  let points=[];
+  let maxX, maxY;
+
+  if(gtype==='FvsA') {
+    fixedEl.textContent = fixed+' kg';
+    xLabel='Fnet (N)'; yLabel='a (m/s²)'; xLabelSub='net';
+    caption=`F<sub>net</sub> vs. a — fixed mass = ${fixed} kg. Steeper slope = smaller mass.`;
+    maxX = 50; maxY = 20;   // axes always 0–50 N, 0–20 m/s²
+    for(let f=0;f<=50;f+=2) points.push({x:f, y:f/fixed});
+  } else if(gtype==='MvsA') {
+    fixedEl.textContent = fixed+' N';
+    xLabel='Mass (kg)'; yLabel='a (m/s²)';
+    caption=`Mass vs. a — fixed F<sub>net</sub> = ${fixed} N. Larger force = higher curve.`;
+    maxX = 20; maxY = 25;   // axes always 0–20 kg, 0–25 m/s²
+    for(let m=0.5;m<=20;m+=0.5) points.push({x:m, y:fixed/m});
+  } else {
+    fixedEl.textContent = fixed+' m/s²';
+    xLabel='Mass (kg)'; yLabel='Fnet (N)'; yLabelSub='net';
+    caption=`F<sub>net</sub> vs. mass — fixed a = ${fixed} m/s². Steeper slope = larger acceleration.`;
+    maxX = 20; maxY = 200;  // axes always 0–20 kg, 0–200 N
+    for(let m=0;m<=20;m+=1) points.push({x:m, y:m*fixed});
+  }
+
+  document.getElementById('graph-caption').innerHTML = caption;
+
+  // Pixel helpers using fixed axis ranges
+  function px(x) { return pad.l + (x/maxX)*gW; }
+  function py(y) { return H-pad.b - (y/maxY)*gH; }
+
+  // Axes
+  ctx.strokeStyle='#1e3a5f'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,H-pad.b); ctx.lineTo(W-pad.r,H-pad.b); ctx.stroke();
+
+  // Grid + ticks — always the same numbers
+  ctx.fillStyle='#7a93b8'; ctx.font='11px DM Mono';
+  for(let i=0;i<=5;i++) {
+    const x = (i/5)*maxX;
+    const gx = px(x);
+    ctx.strokeStyle='rgba(30,58,95,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(gx,pad.t); ctx.lineTo(gx,H-pad.b); ctx.stroke();
+    ctx.textAlign='center';
+    ctx.fillText(x.toFixed(0), gx, H-pad.b+16);
+
+    const y = (i/5)*maxY;
+    const gy = py(y);
+    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(W-pad.r,gy); ctx.stroke();
+    ctx.textAlign='right';
+    ctx.fillText(y.toFixed(0), pad.l-6, gy+4);
+  }
+
+  // Axis labels with subscript support
+  ctx.fillStyle='#94a3b8'; ctx.font='12px DM Sans';
+  ctx.textAlign='center';
+  // Draw x-axis label
+  if(gtype==='FvsA') {
+    ctx.fillText('F', pad.l+gW/2-10, H-6);
+    ctx.font='9px DM Sans'; ctx.fillText('net', pad.l+gW/2-3, H-3);
+    ctx.font='12px DM Sans'; ctx.fillText(' (N)', pad.l+gW/2+12, H-6);
+  } else {
+    ctx.fillText(xLabel, pad.l+gW/2, H-6);
+  }
+  ctx.save(); ctx.translate(14, pad.t+gH/2); ctx.rotate(-Math.PI/2);
+  if(gtype==='FvsM') {
+    ctx.fillText('F', 0, 0);
+    ctx.font='9px DM Sans'; ctx.fillText('net', 8, 3);
+    ctx.font='12px DM Sans'; ctx.fillText(' (N)', 22, 0);
+  } else {
+    ctx.fillText(yLabel, 0, 0);
+  }
+  ctx.restore();
+
+  // Clip to plot area so curves don't overflow axes
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(pad.l, pad.t, gW, gH);
+  ctx.clip();
+
+  // Line
+  ctx.strokeStyle='#0d9488'; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  points.forEach((p,i) => {
+    const fx = px(p.x), fy = py(p.y);
+    if(i===0) ctx.moveTo(fx,fy); else ctx.lineTo(fx,fy);
+  });
+  ctx.stroke();
+
+  // Dots
+  ctx.fillStyle='#fbbf24';
+  points.filter(p => p.x <= maxX && p.y <= maxY).forEach(p => {
+    ctx.beginPath();
+    ctx.arc(px(p.x), py(p.y), 4, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+/* ══════════════════════════════════
+   TAB 7 — CHALLENGE
+══════════════════════════════════ */
+function checkChallenge(id, correct, prefix) {
+  const val = parseFloat(document.getElementById(prefix+'-ans').value);
+  const res = document.getElementById(prefix+'-result');
+  res.style.display='block';
+  if(isNaN(val)) { res.className='ch-result wrong'; res.textContent='Please enter a number.'; return; }
+  const tol = Math.abs(correct)*0.02+0.01;
+  if(Math.abs(val-correct)<=tol) {
+    res.className='ch-result correct';
+    res.textContent='✅ Correct! Answer = '+correct;
+  } else {
+    res.className='ch-result wrong';
+    res.textContent='❌ Not quite. Check your calculation and try again.';
+  }
+}
+
+function toggleHint(id) {
+  const h = document.getElementById(id);
+  h.style.display = h.style.display==='block' ? 'none' : 'block';
+}
+
+/* ══════════════════════════════════
+   TAB 8 — QUIZ
+══════════════════════════════════ */
+const quizData = [
+  {
+    type: 'mc',
+    q: 'Which of the following is an example of Newton\'s First Law?',
+    opts: ['A rocket accelerates as it burns fuel', 'A ball continues rolling on a frictionless surface', 'A swimmer is pushed forward by the pool wall', 'A heavy truck needs more force than a car to accelerate'],
+    ans: 1
+  },
+  {
+    type: 'mc',
+    q: 'What is the net force on a 3 kg object accelerating at 4 m/s²?',
+    opts: ['7 N', '0.75 N', '12 N', '1.3 N'],
+    ans: 2
+  },
+  {
+    type: 'mc',
+    q: 'Two forces act on an object: 20 N right and 8 N left. What is the net force?',
+    opts: ['28 N right', '12 N right', '12 N left', '8 N left'],
+    ans: 1
+  },
+  {
+    type: 'mc',
+    q: 'A 5 kg box is in equilibrium. The normal force equals:',
+    opts: ['0 N', '5 N', '50 N', '25 N'],
+    ans: 2
+  },
+  {
+    type: 'mc',
+    q: 'Which statement best describes Newton\'s Third Law?',
+    opts: ['F = ma', 'Objects at rest stay at rest', 'For every action there is an equal and opposite reaction', 'Acceleration is inversely proportional to mass'],
+    ans: 2
+  },
+  {
+    type: 'calc',
+    q: 'A net force of 45 N acts on a 9 kg object. What is its acceleration (m/s²)?',
+    ans: 5, tol: 0.1, unit: 'm/s²'
+  },
+  {
+    type: 'calc',
+    q: 'An object has a mass of 8 kg and accelerates at 3 m/s². What is the net force (N)?',
+    ans: 24, tol: 0.5, unit: 'N'
+  },
+  {
+    type: 'mc',
+    q: 'If the mass of an object doubles but the net force stays the same, the acceleration:',
+    opts: ['Doubles', 'Stays the same', 'Halves', 'Quadruples'],
+    ans: 2
+  }
+];
+
+let quizScore = 0, quizAnswered = 0, quizAnswers = [];
+
+function initQuiz() {
+  quizScore = 0; quizAnswered = 0; quizAnswers = [];
+  const cont = document.getElementById('quiz-questions');
+  cont.innerHTML = '';
+  document.getElementById('quiz-score').style.display='none';
+  cont.style.display='block';
+  document.getElementById('quiz-bar').style.width='0%';
+  const rev = document.getElementById('quiz-review');
+  if(rev) { rev.innerHTML=''; rev.classList.remove('visible'); }
+  const btn = document.getElementById('btn-see-results');
+  if(btn) btn.style.display = 'none';
+  const label = document.getElementById('quiz-progress-label');
+  if(label) label.textContent = '0 / 8 answered';
+  const liveScore = document.getElementById('live-score');
+  const liveAnswered = document.getElementById('live-answered');
+  if(liveScore) { liveScore.textContent = `0 / ${quizData.length}`; liveScore.style.color='var(--teal2)'; }
+  if(liveAnswered) liveAnswered.textContent = '0 answered';
+
+  quizData.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className='quiz-q'; div.id='qq-'+i;
+    if(q.type==='mc') {
+      div.innerHTML = `
+        <div class="q-num">Question ${i+1} of ${quizData.length}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="mc-options">
+          ${q.opts.map((o,j)=>`<button class="mc-opt" data-qi="${i}" data-j="${j}" onclick="selectMC(this,${i},${j})">${String.fromCharCode(65+j)}. ${o}</button>`).join('')}
+        </div>`;
+    } else {
+      div.innerHTML = `
+        <div class="q-num">Question ${i+1} of ${quizData.length} — Calculation</div>
+        <div class="q-text">${q.q}</div>
+        <div class="calc-q" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="number" id="calc-${i}" placeholder="Your answer" step="any" oninput="recordCalc(${i})">
+          <span class="ch-unit">${q.unit}</span>
+        </div>
+        <div id="calc-fb-${i}" style="margin-top:8px;font-size:.82rem;"></div>`;
+    }
+    cont.appendChild(div);
+  });
+}
+
+function selectMC(btn, qi, j) {
+  const q = document.getElementById('qq-'+qi);
+  const btns = q.querySelectorAll('.mc-opt');
+  const wasSelected = btn.classList.contains('selected');
+  // Was this question previously unanswered?
+  const wasAnswered = quizAnswers[qi] !== undefined;
+  btns.forEach(b => b.classList.remove('selected'));
+  if(!wasSelected) {
+    btn.classList.add('selected');
+    quizAnswers[qi] = { chosen: j };
+    if(!wasAnswered) quizAnswered++;
+  } else {
+    delete quizAnswers[qi];
+    if(wasAnswered) quizAnswered--;
+  }
+  updateQuizProgress();
+}
+
+function recordCalc(qi) {
+  const val = parseFloat(document.getElementById('calc-'+qi).value);
+  const wasAnswered = quizAnswers[qi] !== undefined;
+  if(!isNaN(val)) {
+    quizAnswers[qi] = { val: val };
+    if(!wasAnswered) quizAnswered++;
+  } else {
+    if(wasAnswered) { delete quizAnswers[qi]; quizAnswered--; }
+  }
+  updateQuizProgress();
+}
+
+function updateQuizProgress() {
+  const pct = (quizAnswered/quizData.length)*100;
+  document.getElementById('quiz-bar').style.width=pct+'%';
+  const label = document.getElementById('quiz-progress-label');
+  if(label) label.textContent = `${quizAnswered} / ${quizData.length} answered`;
+  const btn = document.getElementById('btn-see-results');
+  if(btn) btn.style.display = quizAnswered===quizData.length ? 'inline-block' : 'none';
+}
+
+
+function showReview() {
+  // Mark all answers now
+  quizScore = 0;
+  quizData.forEach((q, i) => {
+    const ans = quizAnswers[i];
+    if(!ans) return;
+    if(q.type === 'mc') {
+      ans.isCorrect = ans.chosen === q.ans;
+    } else {
+      ans.isCorrect = Math.abs(ans.val - q.ans) <= q.tol;
+    }
+    if(ans.isCorrect) quizScore++;
+  });
+
+  // Hide Check Answers button, show reset only
+  const btn = document.getElementById('btn-see-results');
+  if(btn) btn.style.display = 'none';
+
+  // Mark MC buttons visually
+  quizData.forEach((q, i) => {
+    const ans = quizAnswers[i];
+    const qEl = document.getElementById('qq-'+i);
+    if(!qEl) return;
+    if(q.type === 'mc') {
+      const btns = qEl.querySelectorAll('.mc-opt');
+      btns.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+      if(ans) {
+        btns[ans.chosen].classList.add(ans.isCorrect ? 'correct' : 'wrong');
+        if(!ans.isCorrect) btns[q.ans].classList.add('correct');
+      } else {
+        // unanswered — highlight correct
+        btns[q.ans].classList.add('correct');
+      }
+    } else {
+      const input = document.getElementById('calc-'+i);
+      const fb = document.getElementById('calc-fb-'+i);
+      if(input) input.disabled = true;
+      if(fb) {
+        if(!ans) {
+          fb.style.color='var(--red)'; fb.textContent='❌ Not answered. Correct: '+q.ans+' '+q.unit;
+        } else if(ans.isCorrect) {
+          fb.style.color='var(--green)'; fb.textContent='✅ Correct!';
+        } else {
+          fb.style.color='var(--red)'; fb.textContent=`❌ Incorrect. Correct answer: ${q.ans} ${q.unit}`;
+        }
+      }
+    }
+  });
+
+  // Build review panel
+  const rev = document.getElementById('quiz-review');
+  rev.innerHTML = '';
+  rev.classList.add('visible');
+
+  const summary = document.createElement('div');
+  summary.style.cssText = 'text-align:center;margin:24px 0 20px;';
+  summary.innerHTML = `
+    <div style="font-size:1.1rem;color:var(--muted);margin-bottom:14px;">
+      You scored <strong style="color:var(--teal2);font-size:1.5rem;">${quizScore} / ${quizData.length}</strong>
+    </div>
+    <button class="btn-final-score" onclick="showQuizScore()">🏆 View Final Score Card</button>
+  `;
+  rev.appendChild(summary);
+}
+
+function showQuizScore() {
+  document.getElementById('quiz-questions').style.display='none';
+  const sc = document.getElementById('quiz-score');
+  sc.style.display='block';
+  const pct = quizScore/quizData.length;
+  const ring = document.querySelector('.score-ring');
+  ring.style.background=`conic-gradient(var(--teal) ${pct*360}deg, var(--navy2) ${pct*360}deg)`;
+  document.getElementById('score-num').textContent=`${quizScore}/${quizData.length}`;
+  const labels = ['Keep practising — review Newton\'s Laws again! 📖', 'Good effort — almost there! 💪', 'Excellent work! Physics master! 🏆'];
+  document.getElementById('score-label').textContent = pct<0.5 ? labels[0] : pct<0.88 ? labels[1] : labels[2];
+  document.getElementById('score-title').textContent = pct===1 ? '🎉 Perfect Score!' : pct>=0.75 ? '🌟 Great Job!' : '📚 Keep Practising';
+}
+
+function restartQuiz() { initQuiz(); }
+
+/* ══════════════════════════════════
+   RESPONSIVE RESIZE
+══════════════════════════════════ */
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('tab-simulate').classList.contains('active')) drawSimCanvas();
+  if(document.getElementById('tab-graph').classList.contains('active')) drawGraph();
+  if(document.getElementById('tab-fbd').classList.contains('active')) drawFBD();
+  drawLearnFBD();
+});
+</script>
+</body>
+</html>
